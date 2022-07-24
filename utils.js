@@ -39,3 +39,22 @@ function polysIntersect(poly1, poly2){
         }
     }
 }
+
+function shuffleArray(arr){
+    let i=arr.length;
+    let j;
+    let temp;
+
+    while (i--) {
+
+        j = Math.floor(Math.random() * (i+1));
+
+        // swap randomly chosen element with current element
+        temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+
+    }
+
+    return arr;
+}
