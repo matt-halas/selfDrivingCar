@@ -1,5 +1,5 @@
 class Road{
-    constructor(x, width, laneCount=4){
+    constructor(x, width, laneCount=3){
         this.x=x;
         const shoulder=0.9;
         this.width=width*shoulder;

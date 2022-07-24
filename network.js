@@ -20,6 +20,8 @@ class NeuralNetwork{
         }
         return outputs;
     }
+
+    static mutate(network,amount=1)
 }
 
 class Level{
