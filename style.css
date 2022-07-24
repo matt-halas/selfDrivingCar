@@ -18,7 +18,9 @@ button{
     padding:5px 5px 7px 5px;
     margin:2px;
     cursor:pointer;
-
+}
+button:hover{
+    background:blue;
 }
 #networkCanvas{
     background:black;
