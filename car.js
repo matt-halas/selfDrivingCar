@@ -24,6 +24,9 @@ class Car{
             this.brain=new NeuralNetwork(
                 [this.sensor.rayCount,6,4]
             );
+            this.distScore=-this.y;
+            this.trafficScore=0
+            this.score=this.distScore+this.trafficScore;
         }
         
 
@@ -34,6 +37,7 @@ class Car{
     update(roadBorders, traffic){
         if(!this.damaged){
             this.#move();
+            this.#calculateScore(traffic);
             this.polygon=this.#createPolygon();
             this.damaged=this.#assessDamage(roadBorders, traffic);
         }
@@ -54,6 +58,17 @@ class Car{
             }
         }
         
+    }
+
+    #calculateScore(traffic){
+        for(let i=0;i<traffic.length;i++){
+            if(this.y<traffic[i].y){
+                this.trafficScore+=1;
+            }
+        }
+        this.distScore=-this.y;
+        this.score=this.trafficScore+this.distScore;
+        return this.score;
     }
 
     #assessDamage(roadBorders, traffic){

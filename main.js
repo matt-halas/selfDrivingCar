@@ -1,20 +1,21 @@
 const carCanvas=document.getElementById("carCanvas");
-carCanvas.width=400;
+
+const laneCount=8;
+carCanvas.width=laneCount*50;
 
 const networkCanvas=document.getElementById("networkCanvas");
 networkCanvas.width=300;
 
-laneCount=8
+let difficulty=0.01;
+const diffScaling=0.01;
 
 const carCtx = carCanvas.getContext("2d");
 const road = new Road(carCanvas.width/2, carCanvas.width, laneCount);
-const traffic = [new Car(road.getLaneCenter(1),-100,30,50,"DUMMY"),
-                 new Car(road.getLaneCenter(0),-300,30,50,"DUMMY"),
-                 new Car(road.getLaneCenter(2),-300,30,50,"DUMMY")];
+const traffic = [new Car(road.getLaneCenter(1),-100,30,50,"DUMMY")];
 
 const networkCtx = networkCanvas.getContext("2d");
 
-const N=2;
+const N=500;
 const cars=generateCars(N);
 let bestCar=cars[0];
 if(localStorage.getItem("bestBrain")){
@@ -23,35 +24,31 @@ if(localStorage.getItem("bestBrain")){
             localStorage.getItem("bestBrain")
         );
         if(i!=0){
-            NeuralNetwork.mutate(cars[i].brain,0.01);
+            NeuralNetwork.mutate(cars[i].brain,0.2);
         }
     }
 }
 
-cars.push(new Car(road.getLaneCenter(1), 100, 30, 50, "KEYS", 5))
-
 animate();
 
-function generateTraffic(bestCarLocation,difficulty=1){
-    let furthestTraffic=traffic.find(
-        c=>c.y==Math.min(
-            ...traffic.map(c=>c.y)
-        )
-    )
-    let furthestTrafficLocation=furthestTraffic.y;
-    if(bestCarLocation-furthestTrafficLocation<400){
-        let laneIndex=[];
-        for(let i=0;i<laneCount;i++){
-            laneIndex.push(i);
-        }
-        shuffledLaneIndex = shuffleArray(laneIndex);
-        for(let i=0;i<difficulty;i++){
-            traffic.push(new Car(
-                road.getLaneCenter(shuffledLaneIndex[i]),
-                furthestTrafficLocation-200,
-                30,50,"DUMMY"))
-            traffic[traffic.length-1].update(road.borders,[]);
-        }
+function generateTraffic(furthestTrafficLocation){
+    //determines the number of cars generated
+    let numCars=Math.ceil(difficulty*laneCount);
+    if (numCars>=laneCount){
+        numCars=laneCount-1;
+    }
+    difficulty+=diffScaling;
+    let laneIndex=[];
+    for(let i=0;i<laneCount;i++){
+        laneIndex.push(i);
+    }
+    shuffledLaneIndex = shuffleArray(laneIndex);
+    for(let i=0;i<numCars;i++){
+        traffic.push(new Car(
+            road.getLaneCenter(shuffledLaneIndex[i]),
+            furthestTrafficLocation-200,
+            30,50,"DUMMY"))
+        traffic[traffic.length-1].update(road.borders,[]);
     }
 }
 
@@ -67,7 +64,7 @@ function discard(){
 function generateCars(N){
     const cars=[];
     for(let i=1;i<N;i++){
-        cars.push(new Car(road.getLaneCenter(1), 100, 30, 50, "AI", 5));
+        cars.push(new Car(road.getLaneCenter(1), 100, 30, 50, "AI", 8));
     }
     return cars;
 }
@@ -88,7 +85,15 @@ function animate(time){
         )
     );
 
-    generateTraffic(bestCar.y);
+    //Checks if more traffic should be generated
+    let furthestTraffic=traffic.find(
+        c=>c.y==Math.min(
+            ...traffic.map(c=>c.y)
+        )
+    );
+    if(bestCar.y-furthestTraffic.y<400){
+        generateTraffic(furthestTraffic.y);
+    }
 
     carCanvas.height=window.innerHeight;
     networkCanvas.height=window.innerHeight;
